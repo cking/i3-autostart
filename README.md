@@ -1,0 +1,3 @@
+# i3-autostart
+
+A simple application that starts all *.desktop files in $XDG_CONFIG_DIRECTORY/autostart, similar to XFCE, Gnome, KDE, ...
