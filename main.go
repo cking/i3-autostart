@@ -2,17 +2,18 @@ package main
 
 import (
 	"errors"
-	"github.com/keegancsmith/shell"
+	"github.com/google/shlex"
 	"github.com/rkoesters/xdg/basedir"
 	"github.com/rkoesters/xdg/desktop"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
-	configDirs := append([]string{}, /*basedir.ConfigDirs,*/ basedir.ConfigHome)
+	configDirs := append([]string{} /*basedir.ConfigDirs,*/, basedir.ConfigHome)
 
 	for _, d := range configDirs {
 		autostartDir := path.Join(d, "autostart")
@@ -54,7 +55,23 @@ func main() {
 			}
 
 			println("found", d.Name, "at", path)
-			cmd := shell.Commandf(d.Exec)
+			tokens, err := shlex.Split(
+				strings.ReplaceAll(
+					strings.ReplaceAll(
+						d.Exec,
+						"%u",
+						"",
+					),
+					"%U",
+					"",
+				),
+			)
+			if err != nil {
+				println("!!! ERROR: ", err.Error())
+				return err
+			}
+
+			cmd := exec.Command(tokens[0], tokens[1:]...)
 			cmd.Dir = d.Path
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
